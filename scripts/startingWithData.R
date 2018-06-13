@@ -1,10 +1,18 @@
 # load package tidiverse
-library(tidyverse)
+#library(tidyverse)
+library(ggplot2)
+library(readr)
 
-download.file("https://ndownloader.figshare.com/files/2292169",
-              "data/portal_data_joined.csv")
+#download.file("https://ndownloader.figshare.com/files/11930600?private_link=fe0cd1848e06456e6f38",
+              "data/surveys_complete.csv")
 
-surveysdb <- read_csv("data/portal_data_joined.csv")
+surveys_complete <- read_csv("data/surveys_complete.csv")
 
-glimpse(surveysdb)
-str(surveysdb)
+glimpse(surveys_complete)
+#str(surveys_complete)
+
+
+ggplot(data = surveys_complete, aes(x = species_id, y = weight, color = plot_id)) +
+    geom_point()
+
+

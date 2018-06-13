@@ -27,4 +27,4 @@ rsconnect/
 .Rproj.user
 .Rproj
 .plots/*
-.data/*
+data/surveys_complete.csv

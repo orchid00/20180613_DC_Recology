@@ -30,13 +30,15 @@
 # provides an interface compliant with the 'DBI' package
 # https://cran.r-project.org/web/packages/RSQLite/index.html
 # Load the libraries ----
+library(dplyr)
 library(dbplyr)
 library(DBI)
 library(RSQLite)
 
+
 # Download data and saving it ----
-if (!dir.exists("data"))
-    dir.create("data", showWarnings = FALSE)
+# if (!dir.exists("data"))
+#    dir.create("data", showWarnings = FALSE)
 
 download.file(url = "https://ndownloader.figshare.com/files/2292171",
               destfile = "data/portal_mammals.sqlite", mode = "wb")
@@ -60,7 +62,14 @@ tbl(DBconnection, "plots")
 
 tbl(DBconnection, sql("SELECT year, species_id, plot_id, weight 
                   FROM surveys
-                 ORDER BY weight DESC"))
+                  ORDER BY weight DESC"))
+
+
+tbl(DBconnection, sql("SELECT * 
+                  FROM surveys
+                  WHERE year == 2002 AND weight > 220
+                  ORDER BY year DESC"))
+
 # what have we done here?
 # Yes! we can use all of the queries that we wrote on the SQL lesson
 # dbplyr syntax ----
@@ -68,7 +77,26 @@ tbl(DBconnection, sql("SELECT year, species_id, plot_id, weight
 surveys <- tbl(DBconnection, "surveys")
 
 surveys %>% 
-    select(year, species_id, plot_id, weight)
+    filter(year == 2002, weight > 220)
+
+
+surveys2002 <- surveys %>% 
+    filter(year == 2002) %>% 
+    as.data.frame() 
+ 
+library(ggplot2)  
+ggplot(data = surveys2002, aes(weight, colour = "red")) +
+    stat_density(geom = "line", size = 2, position = "identity") +
+    theme_classic() +
+    theme(legend.position = "none")
+
+surveys %>% 
+    filter(year == 2002) %>% 
+    as.data.frame() %>% 
+    ggplot(aes(weight, colour = "red")) +
+    stat_density(geom = "line", size = 2, position = "identity") +
+    theme_classic() +
+    theme(legend.position = "none")
 
 # some functions from R will work in our view of the table
 head(surveys)
@@ -107,10 +135,28 @@ surveys %>%
 
 plots <- tbl(DBconnection, "plots")
 plots %>%
+    inner_join(surveys) %>%
+    collect()
+
+
+# to save -----------------------------------------------------------------
+library(readr)
+
+# to save as CSV
+holder <- 
+ plots %>%
     filter(plot_id == 1) %>%
     inner_join(surveys) %>%
-  collect()
+    collect()
 
-myplots <- format_csv(plots)
-write_csv(plots, file.path("data", "plots_exported.csv"))
+write_csv(holder, file.path("data", "plots_exported.csv"))
+
+
+# Extra 
+myplotsCSV <-
+    plots %>%
+    filter(plot_id == 1) %>%
+    inner_join(surveys) %>%
+    collect() %>% 
+    format_csv()
 
