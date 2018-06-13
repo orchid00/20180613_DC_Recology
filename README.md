@@ -1,2 +1,3 @@
-# 20180613_DC_Recology
-R ecology lesson R and SQL
+# DC R ecology
+
+Repo for R ecology lesson, connecting R and SQL
